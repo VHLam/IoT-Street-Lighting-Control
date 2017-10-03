@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A website for displaying and controlling status of object using MQTT over Websockets">
+    <meta name="author" content="Vo Hong Lam">
+
+    <title>Home conditions</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- MQTT Websocket -->
+    <script type="text/javascript" src="js/mqttws31.js"></script>
+    <script type="text/javascript">
+        var host = 'broker.hivemq.com';
+        var port = 8000;
+        var topic = 'smartlighting';
+        var useTLS = false;
+        var cleansession = true;
+        var mqtt;
+        var reconnectTimeout = 2000;
+
+        function MQTTconnect() {
+	    if (typeof path == "undefined") {
+		    path = '/mqtt';
+	    }
+	    mqtt = new Paho.MQTT.Client(
+			    host,
+			    port,
+			    path,
+			    "mqtt_panel" + parseInt(Math.random() * 100, 10)
+	    );
+            var options = {
+                timeout: 3,
+                useSSL: useTLS,
+                cleanSession: cleansession,
+                onSuccess: onConnect,
+                onFailure: function (message) {
+                    $('#status').html("Connection failed: " + message.errorMessage + "Retrying...");
+                    setTimeout(MQTTconnect, reconnectTimeout);
+                }
+            };
+
+            mqtt.onConnectionLost = onConnectionLost;
+            mqtt.onMessageArrived = onMessageArrived;
+            console.log("Host: "+ host + ", Port: " + port + ", Path: " + path + " TLS: " + useTLS);
+            mqtt.connect(options);
+        };
+
+        function onConnect() {
+            $('#status').html('Connected to ' + host + ':' + port + path);
+            mqtt.subscribe(topic, {qos: 0});
+			publish('a','smartlighting',0);
+            $('#topic').html(topic);
+        };
+
+        function onConnectionLost(response) {
+            setTimeout(MQTTconnect, reconnectTimeout);
+            $('#status').html("Connection lost: " + responseObject.errorMessage + ". Reconnecting...");
+        };
+		
+		var publish = function (payload, topic, qos) {
+			var message = new Paho.MQTT.Message(payload);
+			message.destinationName = topic;
+			message.qos = qos;
+			mqtt.send(message);
+		}
+	
+        function onMessageArrived(message) {
+            var topic = message.destinationName;
+            var payload = message.payloadString;
+            console.log("Topic: " + topic + ", Message payload: " + payload);
+            $('#message').html(topic + ', ' + payload);
+            var message = topic.split('/');
+            var area = message[1];
+            var state = message[2];
+
+            var currentdate = new Date(); 
+			var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+			
+			var node = document.createElement("LI");
+			var textnode;
+			
+            switch (payload) {
+                case '0': 
+                    $('#value1').html('(Switch value: On)');               
+                    $('#label1').text('Light 1: On');
+                    $('#label1').removeClass('label-danger').addClass('label-success');
+					textnode = document.createTextNode(datetime + "  Light 1: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+                case '1':
+                    $('#value1').html('(Switch value: Off)');
+                    $('#label1').text('Light 1: Off');   
+					$('#label1').removeClass('label-success').addClass('label-danger');
+					textnode = document.createTextNode(datetime + "  Light 1: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+                case '2': 
+                    $('#value2').html('(Switch value: On)');               
+                    $('#label2').text('Light 2: On');
+                    $('#label2').removeClass('label-danger').addClass('label-success');
+					textnode = document.createTextNode(datetime + "  Light 2: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+                case '3':
+                    $('#value2').html('(Switch value: Off)');
+                    $('#label2').text('Light 2: Off');   
+					$('#label2').removeClass('label-success').addClass('label-danger');
+					textnode = document.createTextNode(datetime + "  Light 2: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;		
+                case '4': 
+                    $('#value3').html('(Switch value: On)');               
+                    $('#label3').text('Light 3: On');
+                    $('#label3').removeClass('label-danger').addClass('label-success');
+					textnode = document.createTextNode(datetime + "  Light 3: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+                case '5':
+                    $('#value3').html('(Switch value: Off)');
+                    $('#label3').text('Light 3: Off');   
+					$('#label3').removeClass('label-success').addClass('label-danger');
+					textnode = document.createTextNode(datetime + "  Light 3: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;	
+                case '6': 
+                    $('#value4').html('(Switch value: On)');               
+                    $('#label4').text('Light 4: On');
+                    $('#label4').removeClass('label-danger').addClass('label-success');
+					textnode = document.createTextNode(datetime + "  Light 4: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+                case '7':
+                    $('#value4').html('(Switch value: Off)');
+                    $('#label4').text('Light 4: Off');   
+					$('#label4').removeClass('label-success').addClass('label-danger');
+					textnode = document.createTextNode(datetime + "  Light 4: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;		
+                case '8':
+					$('#value1').html('(Switch value: On)');               
+                    $('#label1').text('Light 1: On');
+                    $('#label1').removeClass('label-danger').addClass('label-success');
+					$('#value2').html('(Switch value: On)');               
+                    $('#label2').text('Light 2: On');
+                    $('#label2').removeClass('label-danger').addClass('label-success');
+					$('#value3').html('(Switch value: On)');               
+                    $('#label3').text('Light 3: On');
+                    $('#label3').removeClass('label-danger').addClass('label-success');
+					$('#value4').html('(Switch value: On)');               
+                    $('#label4').text('Light 4: On');
+                    $('#label4').removeClass('label-danger').addClass('label-success');
+					textnode = document.createTextNode(datetime + "  Light 1: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+					textnode = document.createTextNode(datetime + "  Light 2: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+					textnode = document.createTextNode(datetime + "  Light 3: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+					textnode = document.createTextNode(datetime + "  Light 4: On");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+				case '9':
+					$('#value1').html('(Switch value: Off)');
+                    $('#label1').text('Light 1: Off');   
+					$('#label1').removeClass('label-success').addClass('label-danger');
+					$('#value2').html('(Switch value: Off)');
+                    $('#label2').text('Light 2: Off');   
+					$('#label2').removeClass('label-success').addClass('label-danger');
+					$('#value3').html('(Switch value: Off)');
+                    $('#label3').text('Light 3: Off');   
+					$('#label3').removeClass('label-success').addClass('label-danger');
+					$('#value4').html('(Switch value: Off)');
+                    $('#label4').text('Light 4: Off');   
+					$('#label4').removeClass('label-success').addClass('label-danger');
+					textnode = document.createTextNode(datetime + "  Light 1: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+					textnode = document.createTextNode(datetime + "  Light 2: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+					textnode = document.createTextNode(datetime + "  Light 3: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+					textnode = document.createTextNode(datetime + "  Light 4: Off");
+					node.appendChild(textnode);
+					document.getElementById("myList").appendChild(node);
+                    break;
+                default: console.log('Error: Data do not match the MQTT topic.'); 
+					break;
+            }
+        };
+		
+		function log(message) {
+			var node = document.createElement("LI");
+			var textnode = document.createTextNode("Water");
+			node.appendChild(textnode);
+			document.getElementById("myList").appendChild(node);
+		}
+				
+        $(document).ready(function() {
+            MQTTconnect();
+        });
+    </script>
+
+  </head>
+
+  <body>
+    <div id="wrap">
+      <div class="container">
+        <div class="page-header"><h1><b>Home conditions</b></h1></div>
+
+            <div class="panel panel-default">
+              <div class="panel-body">
+                    <table class="table table-striped">
+                        <!-- Light 1 -->
+                        <tr>
+                        <td width="40%" style="vertical-align:middle;"><h3>Light 1</h3><small id="value1">(no value recieved)</small></td>
+                        <td style="vertical-align:middle;">
+							<div id="btnwrap">
+								<button onclick="publish('0','smartlighting',0);" class="buttonMQTT">ON</button>
+								<button onclick="publish('1','smartlighting',0);" class="buttonMQTT">OFF</button>
+							</div>
+						</td>
+                        <td width="30%" style="vertical-align:middle;"><h4>&nbsp;<span id="label1" class="label">Unknown</span></h4></td>
+                        </tr>
+                        <!-- Light 2 -->
+                        <tr>
+                        <td width="40%" style="vertical-align:middle;"><h3>Light 2</h3><small id="value2">(no value recieved)</small></td>
+                        <td style="vertical-align:middle;">
+							<div id="btnwrap">
+								<button onclick="publish('2','smartlighting',0);" class="buttonMQTT">ON</button>
+								<button onclick="publish('3','smartlighting',0);" class="buttonMQTT">OFF</button>
+							</div>
+						</td>
+                        <td width="30%" style="vertical-align:middle;"><h4>&nbsp;<span id="label2" class="label">Unknown</span></h4></td>
+                        </tr>
+						<!-- Light 3 -->
+						<tr>
+                        <td width="40%" style="vertical-align:middle;"><h3>Light 3</h3><small id="value3">(no value recieved)</small></td>
+                        <td style="vertical-align:middle;">
+							<div id="btnwrap">
+								<button onclick="publish('4','smartlighting',0);" class="buttonMQTT">ON</button>
+								<button onclick="publish('5','smartlighting',0);" class="buttonMQTT">OFF</button>
+							</div>
+						</td>
+                        <td width="30%" style="vertical-align:middle;"><h4>&nbsp;<span id="label3" class="label">Unknown</span></h4></td>
+                        </tr>
+						<!-- Light 4 -->
+						<tr>
+                        <td width="40%" style="vertical-align:middle;"><h3>Light 4</h3><small id="value4">(no value recieved)</small></td>
+                        <td style="vertical-align:middle;">
+							<div id="btnwrap">
+								<button onclick="publish('6','smartlighting',0);" class="buttonMQTT">ON</button>
+								<button onclick="publish('7','smartlighting',0);" class="buttonMQTT">OFF</button>
+							</div>
+						</td>
+                        <td width="30%" style="vertical-align:middle;"><h4>&nbsp;<span id="label4" class="label">Unknown</span></h4></td>
+                        </tr>
+                    </table>
+              </div>
+            </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+              <div class="row">
+                <div class="col-md-6"><b>Latest MQTT message:  </b> <small id="message">no message recieved</small></div>
+                <div class="col-md-6"><b>Status: </b>  <small id='status'></small></div>
+              </div>
+          </div>
+        </div>
+		
+		<ul id="myList">
+
+		</ul>
+  </body>
+</html>
